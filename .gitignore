@@ -1,0 +1,46 @@
+# Ruff
+.ruff_cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+.venv/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data (keep structure, ignore content)
+data/*.json
+!data/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temp files (menu exports, notes)
+/01*.txt
+notes*.txt
+
+# Local documentation
+explanation.md
+.windsurf.bak
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/

@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  menu-processor:
+    build: .
+    container_name: menu-processor
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - MEALIE_BASE_URL=${MEALIE_BASE_URL}
+      - MEALIE_API_KEY=${MEALIE_API_KEY}
+    networks:
+      - intranet_net
+    # Resource limits optimized for QNAP TS-264 (8GB RAM, 2-4 users)
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+networks:
+  intranet_net:
+    external: true
+    name: intranet_net

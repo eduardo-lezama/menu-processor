@@ -1,0 +1,142 @@
+TAREA:  
+Analiza el siguiente documento (PDF convertido a texto) que contiene un menú semanal en catalán, con días, comidas y una sección final de recetas.
+Tu objetivo es extraer toda la información relevante y devolverla en un JSON estructurado, siguiendo exactamente el formato especificado más abajo.
+1. INSTRUCCIONES GENERALES
+
+    El documento puede contener:
+
+        secciones de desayuno/esmorzar/mig matí/berenar
+
+        una tabla de “MENÚ SETMANAL” con DINAR y SOPAR
+
+        una sección de “RECEPTES” con ingredientes y preparación
+
+    El texto puede estar en catalán, con abreviaturas y variantes dialectales.
+
+    No inventes información.
+
+    Si un ingrediente aparece sin cantidad, deja quantity vacío.
+
+    Si una receta tiene varias variantes, extrae todas.
+
+    Si un plato del menú coincide con una receta del documento, marca ese plato como "type": "recipe".
+
+2. FORMATO JSON A DEVOLVER
+
+Debes devolver un JSON con esta estructura exacta:
+json
+
+{
+  "source": "<nombre del archivo o identificador>",
+  "period": "<mes o rango si aparece en el documento>",
+  "menus": [
+    {
+      "name": "<nombre del menú o semana>",
+      "days": [
+        {
+          "day": "<nombre del día>",
+          "meals": {
+            "dinar": [
+              { "type": "ingredient", "name": "...", "quantity": null, "unit": null },
+              { "type": "recipe", "name": "..." }
+            ],
+            "sopar": [ ... ],
+            "esmorzar": [ ... ],
+            "berenar": [ ... ]
+          }
+        }
+      ]
+    }
+  ],
+  "recipes": [
+    {
+      "name": "<nombre de la receta>",
+      "ingredients": [
+        { "name": "...", "quantity": null, "unit": null }
+      ],
+      "variants": [
+        ["ingredient1", "ingredient2", "ingredient3"]
+      ]
+    }
+  ]
+}
+
+3. REGLAS DE EXTRACCIÓN
+3.1. Días y comidas
+
+    Extrae todos los días del menú semanal (DILLUNS → DIUMENGE).
+
+    Dentro de cada día, extrae:
+
+        DINAR
+
+        SOPAR
+
+        y si aparecen, ESMORZAR / MIG MATÍ / BERENAR
+
+    Cada comida contiene una lista de platos.
+
+    Cada plato puede ser:
+
+        un ingrediente directo → "type": "ingredient"
+
+        una receta definida en la sección RECEPTES → "type": "recipe"
+
+Ejemplo:
+
+    “Caldo depuratiu” → "type": "recipe", "name": "caldo depuratiu"  
+    “Llenties o cigrons amb verdures (bròquil, carbassó...)” → desglosar en ingredientes individuales.
+
+3.2. Ingredientes
+
+    Extrae ingredientes individuales aunque estén dentro de frases complejas.
+
+    Si hay listas entre paréntesis, expándelas.
+
+    Si hay opciones (“llenties o cigrons”), incluye ambos ingredientes.
+
+    Si hay cantidades explícitas, extráelas:
+
+        “30g pa de fajol” → "quantity": 30, "unit": "g"
+
+3.3. Recetas
+
+    Extrae todas las recetas de la sección RECEPTES.
+
+    Cada receta puede tener:
+
+        una lista de ingredientes
+
+        o varias variantes (como en “caldo depuratiu”)
+
+    No incluyas instrucciones de preparación.
+
+Ejemplo basado en el documento:
+
+    “1-2 branques d’api, 3 cebes mitjanes i 1 grapat de julivert + 2l aigua”
+
+3.4. NORMALIZACIÓN
+- Todos los nombres de ingredientes en minúsculas
+- Mantén acentos catalanes (bròquil, carbassó)
+- Si hay notas específicas para personas (ej: "Edu + tonyina"), 
+  añade campo "notes": "Edu: + tonyina al natural"
+
+3.5. VALIDACIÓN
+- Si un plato tiene "type": "recipe", su "name" DEBE coincidir 
+  exactamente con una receta en el array "recipes"
+- Si no hay receta definida, usa "type": "ingredient" y desglosa
+
+Debe convertirse en:
+json
+
+{
+  "name": "caldo depuratiu",
+  "variants": [
+    ["api", "ceba", "julivert", "aigua"]
+  ]
+}
+
+4. SALIDA
+
+Devuelve solo el JSON final, sin explicaciones adicionales.
+Debe ser válido, parseable y seguir exactamente la estructura definida.
