@@ -20,7 +20,13 @@ def create_app():
     app = Flask(__name__, static_folder="../static", template_folder="../templates")
 
     # Configuración
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
+    flask_env = os.environ.get("FLASK_ENV", "development").lower()
+    secret_key = os.environ.get("SECRET_KEY")
+
+    if flask_env == "production" and (not secret_key or secret_key == "dev-secret-key"):
+        raise RuntimeError("SECRET_KEY debe estar definida en producción")
+
+    app.config["SECRET_KEY"] = secret_key or "dev-secret-key"
     app.config["MEALIE_BASE_URL"] = os.environ.get("MEALIE_BASE_URL", "")
     app.config["MEALIE_API_KEY"] = os.environ.get("MEALIE_API_KEY", "")
     # URL pública de Mealie para enlaces en el navegador (no Docker interno)
